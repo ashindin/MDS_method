@@ -32,7 +32,7 @@ double DN(long int T, double z, double dt)
     (1-exp(-(t_d-t_r)/tau_r))*exp(-(T*dt-t_d)/tau_d)*heaviside(T*dt-t_d, 0.);
     return DN_max*f;
 }
-double omega_fun(long int T, double z, double dt)
+double omega_fun(long long T, double z, double dt)
 {
     return 2*M_PI*Ne_to_fpe(N0_fun(z)+DN(T,z,dt));
 }
@@ -90,13 +90,70 @@ int main()
 
     double *dx = malloc(KE * sizeof(double));
     double *ex = malloc(KE * sizeof(double));
-    double *hy = malloc(KE * sizeof(double));
+    double *hy = malloc((KE-1) * sizeof(double));
     double *sx = malloc(KE * sizeof(double));
     double *sxm1 = malloc(KE * sizeof(double));
     double *sxm2 = malloc(KE * sizeof(double));
     double *omega = malloc(KE * sizeof(double));
 
-    long long T_end = 125000000LL*60LL + 5LL*125000LL; // 60.005 s
+    // long long T_end = 125000000LL*60LL + 5LL*125000LL; // 60.005 s
+    long long T_end = 25000000LL + 5LL*125000LL; // 0.205 s
+
+    double nu = 1000.;
+
+    double dx_old_1 = 0., dx_old_N_1 = 0.;
+    int pulse_num = 0;
+
+    // double *E_out = malloc(125000000 * sizeof(double)); // 1.0 s
+    double *E_out = malloc(25625000 * sizeof(double)); // 0.205 s
+
+    for(int i = 0; i<KE; i++)
+    {
+        omega[i] = omega_fun(0, h_axe[i], dt);
+        dx[i] = 0.;
+        ex[i] = 0.;
+        hy[i] = 0.;
+        sx[i] = 0.;
+        sxm1[i] = 0.;
+        sxm2[i] = 0.;
+    }
+
+    for(long long T = 1; T < T_end; T++)
+    {
+        if(T % 125000 == 0 ) printf("T = %lld\n", T);
+
+        dx_old_1 = dx[1];
+        dx_old_N_1 = dx[KE-2];
+        
+        for (int i = 1; i < KE-1; i++) dx[i] = dx[i] - 0.5 * (hy[i] - hy[i-1]);
+
+        if(T == p_start_inds[pulse_num])
+        {            
+            for(int i = 0; i<KE; i++) omega[i] = omega_fun(T, h_axe[i], dt);
+            pulse_num+=1;
+        }
+        
+        if(T-p_start_inds[pulse_num] < pT_end) dx[5] = dx[5] + Pulse[T-p_start_inds[pulse_num]];
+
+        dx[0] = dx_old_1+(-1/3)*(dx[1]-dx[0]);  // bc0
+        dx[KE-1] = dx_old_N_1+(-1/3)*(dx[KE-2]-dx[KE-1]);  // bcN
+
+        for (int i = 0; i < KE; i++) ex[i] = dx[i]-sx[i];
+        
+        E_out[T] = ex[5]; // rewrite it!
+
+        for (int i = 0; i < KE; i++) 
+        {
+            sx[i] = (1+exp(-nu*dt))*sxm1[i] - exp(-nu*dt) * sxm2[i] + pow(omega[i],2)*dt/nu*(1-exp(-nu*dt))*ex[i];
+            sxm2[i] = sxm1[i];
+            sxm1[i] = sx[i];            
+        }
+
+        for (int i = 0; i < KE-1; i++) hy[i] = hy[i] - 0.5 * (ex[i+1] - ex[i]);
+    }
+    // Write Ex to file:
+    
+
 
     // printf("%i\n", KE);
     // printf("%i %i", pulse_start_time_ind, pulse_end_time_ind);
@@ -106,5 +163,8 @@ int main()
     printf("%lld\n", p_start_inds[0]);
     printf("%lld\n", p_start_inds[1]);
     printf("%lld\n", p_start_inds[num_of_pulses-1]);
+    
+    
+
     return 0;
 } 
