@@ -40,15 +40,17 @@ double omega_fun(long long T, double z, double dt)
 int main()
 {
     double c = 299792458;
-    double scale_ex = 4*M_PI*c*1e-7, scale_dx = 1/c;
+    double scale_ex = 4*M_PI*c*1e-7;
+    // double scale_dx = 1/c;
     double dt = 8e-9, ddx = dt*(2*c);
     long int KE = 500000/ddx;
 
     double pulse_freq1 = 4.4*1e6, pulse_freq2 = 4.6*1e6;
-    double pulse_start_time = 52.5e-6, pulse_end_time = 152.5e-6;
+    // double pulse_start_time = 52.5e-6;
+    // double pulse_end_time = 152.5e-6;
     
-    long int pulse_start_time_ind = pulse_start_time/dt;
-    long int pulse_end_time_ind = pulse_end_time/dt;
+    //long int pulse_start_time_ind = pulse_start_time/dt;
+    // long int pulse_end_time_ind = pulse_end_time/dt;
     
     // int z1 = 150000, z2 = 350000, zmax = 250000;
     // double fmax = 5e6, Nmax = fpe_to_Ne(fmax);
@@ -76,10 +78,11 @@ int main()
         heaviside(i*dt-p_tstart, 0.)*(1-heaviside(i*dt-p_tend, 0.));
     }
     
-    double pPeriod = 100e-3;
-    int pPeriod_ind = pPeriod/dt;
+    // double pPeriod = 100e-3;
+    // int pPeriod_ind = pPeriod/dt;
 
-    double f_pump = 4.6e6, N_pump = fpe_to_Ne(f_pump);
+    // double f_pump = 4.6e6;
+    // double N_pump = fpe_to_Ne(f_pump);
 
     int num_of_pulses = 601;
     long long *p_start_inds = malloc(num_of_pulses * sizeof(long long));
@@ -152,17 +155,19 @@ int main()
         for (int i = 0; i < KE-1; i++) hy[i] = hy[i] - 0.5 * (ex[i+1] - ex[i]);
     }
     // Write Ex to file:
-    
-
+    FILE *write_ptr;
+    write_ptr = fopen("Ex_out_205ms.bin","wb");
+    fwrite(E_out,sizeof(E_out),1,write_ptr); // write 10 bytes from our buffer
+    fclose(write_ptr);
 
     // printf("%i\n", KE);
     // printf("%i %i", pulse_start_time_ind, pulse_end_time_ind);
     // printf("%f\n", Nmax);
     // printf("%f\n", h_axe[KE-1]);
     // printf("%f\n", h_axe[1]);
-    printf("%lld\n", p_start_inds[0]);
-    printf("%lld\n", p_start_inds[1]);
-    printf("%lld\n", p_start_inds[num_of_pulses-1]);
+    // printf("%lld\n", p_start_inds[0]);
+    // printf("%lld\n", p_start_inds[1]);
+    // printf("%lld\n", p_start_inds[num_of_pulses-1]);
     
     
 
