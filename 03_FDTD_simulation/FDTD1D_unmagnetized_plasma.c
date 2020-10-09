@@ -27,7 +27,7 @@ double DN(long int T, double z, double dt)
     double dN = 26250.574920080297;
     double d_z = 3000.;
     double t_r = 0., t_d = 6., tau_r = 10., tau_d = 10.;
-    double DN_max = -dN*(exp(-pow(z-z0,2))/2/pow(d_z,2));
+    double DN_max = -dN * ( exp(-pow(z-z0,2.)/2/pow(d_z,2.)) );
     double f = (1-exp(-(T*dt-t_r)/tau_r))*(heaviside(T*dt-t_r, 0.)-(heaviside(T*dt-t_d, 0.)))+
     (1-exp(-(t_d-t_r)/tau_r))*exp(-(T*dt-t_d)/tau_d)*heaviside(T*dt-t_d, 0.);
     return DN_max*f;
@@ -119,7 +119,6 @@ int main()
     for(int i = 0; i<KE; i++)
     {
         omega[i] = omega_fun(0, h_axe[i], dt);
-        // omega[i] = 0.;
         dx[i]    = 0.;
         ex[i]    = 0.;        
         sx[i]    = 0.;
@@ -141,7 +140,7 @@ int main()
         if(T % 1000 == 0)
         {
             printf("T = %lld\n", T);
-            sprintf(dbg_filename,"Ex_dbg_%06lld.bin",T);
+            sprintf(dbg_filename,"dbg/Ex_dbg_%06lld.bin",T);
             dbg_write_ptr = fopen(dbg_filename,"wb");
             fwrite(ex,sizeof(ex),KE,dbg_write_ptr);
             fclose(dbg_write_ptr);
@@ -170,7 +169,7 @@ int main()
 
         for (int i = 0; i < KE; i++) 
         {
-            sx[i] = (1+exp(-nu*dt))*sxm1[i] - exp(-nu*dt) * sxm2[i] + pow(omega[i],2)*dt/nu*(1-exp(-nu*dt))*ex[i];
+            sx[i] = (1+exp(-nu*dt))*sxm1[i] - exp(-nu*dt) * sxm2[i] + pow(omega[i],2.)*dt/nu*(1-exp(-nu*dt))*ex[i];
             sxm2[i] = sxm1[i];
             sxm1[i] = sx[i];            
         }
