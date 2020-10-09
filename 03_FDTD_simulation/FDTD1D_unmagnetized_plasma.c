@@ -84,12 +84,16 @@ int main()
     // double f_pump = 4.6e6;
     // double N_pump = fpe_to_Ne(f_pump);
 
-    int num_of_pulses = 601;
+    // int num_of_pulses = 601;
+    int num_of_pulses = 3;
     long long *p_start_inds = malloc(num_of_pulses * sizeof(long long));
+    printf("%s\n", "Pulse start indexes:");
     for(int i = 0; i < num_of_pulses; i++)
     {
         p_start_inds[i] = 0 + i*12500000LL; // 12500000 - 100 ms period
+        printf("%d - %lld\n", i, p_start_inds[i]);
     }
+    printf("%s", "\n");
 
     double *dx = malloc(KE * sizeof(double));
     double *ex = malloc(KE * sizeof(double));
@@ -100,7 +104,8 @@ int main()
     double *omega = malloc(KE * sizeof(double));
 
     // long long T_end = 125000000LL*60LL + 5LL*125000LL; // 60.005 s
-    long long T_end = 25000000LL + 5LL*125000LL; // 0.205 s
+    // long long T_end = 25000000LL + 5LL*125000LL; // 0.205 s
+    long long T_end = 5LL*125000LL; // 0.005 s
 
     double nu = 1000.;
 
@@ -108,22 +113,39 @@ int main()
     int pulse_num = 0;
 
     // double *E_out = malloc(125000000 * sizeof(double)); // 1.0 s
-    double *E_out = malloc(25625000 * sizeof(double)); // 0.205 s
+    // double *E_out = malloc(25625000 * sizeof(double)); // 0.205 s
+    double *E_out = malloc(5*125000 * sizeof(double)); // 0.005 s
 
     for(int i = 0; i<KE; i++)
     {
         omega[i] = omega_fun(0, h_axe[i], dt);
-        dx[i] = 0.;
-        ex[i] = 0.;
-        hy[i] = 0.;
-        sx[i] = 0.;
-        sxm1[i] = 0.;
-        sxm2[i] = 0.;
+        // omega[i] = 0.;
+        dx[i]    = 0.;
+        ex[i]    = 0.;        
+        sx[i]    = 0.;
+        sxm1[i]  = 0.;
+        sxm2[i]  = 0.;
     }
+    for(int i=0; i<KE-1; i++) hy[i] = 0.;
+
+    FILE *dbg_write_ptr;
+    char dbg_filename[80];
 
     for(long long T = 1; T < T_end; T++)
     {
-        if(T % 125000 == 0 ) printf("T = %lld\n", T);
+        // if(T==317)
+        // {
+        //     printf("%s\n","DEBUG");
+        // }
+        // if(T % 125000 == 0)
+        if(T % 1000 == 0)
+        {
+            printf("T = %lld\n", T);
+            sprintf(dbg_filename,"Ex_dbg_%06lld.bin",T);
+            dbg_write_ptr = fopen(dbg_filename,"wb");
+            fwrite(ex,sizeof(ex),KE,dbg_write_ptr);
+            fclose(dbg_write_ptr);
+        }
 
         dx_old_1 = dx[1];
         dx_old_N_1 = dx[KE-2];
@@ -138,10 +160,11 @@ int main()
         
         if(T-p_start_inds[pulse_num] < pT_end) dx[5] = dx[5] + Pulse[T-p_start_inds[pulse_num]];
 
-        dx[0] = dx_old_1+(-1/3)*(dx[1]-dx[0]);  // bc0
-        dx[KE-1] = dx_old_N_1+(-1/3)*(dx[KE-2]-dx[KE-1]);  // bcN
+        dx[0]    = dx_old_1   + (-1./3.) * (dx[1]    - dx[0]   );  // bc0
+        dx[KE-1] = dx_old_N_1 + (-1./3.) * (dx[KE-2] - dx[KE-1]);  // bcN
 
         for (int i = 0; i < KE; i++) ex[i] = dx[i]-sx[i];
+        // for (int i = 0; i < KE; i++) ex[i] = dx[i];
         
         E_out[T] = ex[5]; // rewrite it!
 
@@ -156,8 +179,8 @@ int main()
     }
     // Write Ex to file:
     FILE *write_ptr;
-    write_ptr = fopen("Ex_out_205ms.bin","wb");
-    fwrite(E_out,sizeof(E_out),1,write_ptr); // write 10 bytes from our buffer
+    write_ptr = fopen("Ex_out_5ms.bin","wb");
+    fwrite(E_out,sizeof(E_out),5*125000,write_ptr);
     fclose(write_ptr);
 
     // printf("%i\n", KE);
