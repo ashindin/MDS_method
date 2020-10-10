@@ -74,8 +74,8 @@ int main()
         heaviside(i*dt-p_tstart, 0.)*(1-heaviside(i*dt-p_tend, 0.));
     }
 
-    // int num_of_pulses = 601;
-    int num_of_pulses = 3;
+    int num_of_pulses = 601;
+    // int num_of_pulses = 3;
     
     // Pulse start indexes
     long long *p_start_inds = malloc(num_of_pulses * sizeof(long long));
