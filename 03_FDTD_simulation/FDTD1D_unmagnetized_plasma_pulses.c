@@ -91,8 +91,8 @@ int main()
     // double *E_out = malloc(25625000 * sizeof(double)); // 0.205 s
     double *E_out = malloc(5*125000 * sizeof(double)); // 0.005 s
 
-    // for(int pulse_num = 0; pulse_num < num_of_pulses; pulse_num++)  
-    for(int pulse_num = 1; pulse_num < num_of_pulses; pulse_num++)    
+    for(int pulse_num = 0; pulse_num < num_of_pulses; pulse_num++)  
+    // for(int pulse_num = 1; pulse_num < num_of_pulses; pulse_num++)    
     {
         printf("Pulse number = %03d\n", pulse_num);
         // Arrays initialization
