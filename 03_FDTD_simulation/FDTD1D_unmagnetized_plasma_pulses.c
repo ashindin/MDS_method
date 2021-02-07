@@ -66,7 +66,8 @@ int main()
     FILE *out_write_ptr;
     char out_filename[80];
 
-    double nu = 1000.;
+    // double nu = 1000.;
+    double nu = 100.;
 
     for(int i = 0; i < pT_end; i++)
     {

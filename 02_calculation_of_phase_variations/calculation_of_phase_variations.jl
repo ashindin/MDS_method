@@ -27,7 +27,7 @@ end
 # sqrt_eps_integral(1000., 45e5, 5., z1, z2, zmax, dN, z0, d_z, t_r, t_d, tau_r, tau_d)
 
 function phase_variations(ω, t1, t2, z_step, z1, z2, zmax, dN, z0, d_z, t_r, t_d, tau_r, tau_d)
-    c = 299792458
+    c = 299792458.
     phase2 = 2ω/c * sqrt_eps_integral(z_step, ω, t2, z1, z2, zmax, dN, z0, d_z, t_r, t_d, tau_r, tau_d)
     phase1 = 2ω/c * sqrt_eps_integral(z_step, ω, t1, z1, z2, zmax, dN, z0, d_z, t_r, t_d, tau_r, tau_d)
     return phase2 - phase1
